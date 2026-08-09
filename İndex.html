@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oranmerkezi - Detaylı Analiz</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #fff; padding: 15px; }
+        .container { max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 5px 0; background: #1e293b; border: 1px solid #334155; color: #fff; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #3b82f6; border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .card { background: #1e293b; padding: 15px; border-radius: 8px; border-left: 4px solid #38bdf8; }
+        .label { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
+        .value { font-size: 18px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Oranmerkezi Detaylı Analiz</h2>
+    <input type="text" id="ev" placeholder="Ev Sahibi">
+    <input type="text" id="dep" placeholder="Deplasman">
+    <div style="display:flex; gap:5px;">
+        <input type="number" id="ms1" step="0.01" placeholder="MS 1">
+        <input type="number" id="ms0" step="0.01" placeholder="MS 0">
+        <input type="number" id="ms2" step="0.01" placeholder="MS 2">
+    </div>
+    <button onclick="analizEt()">ANALİZİ BAŞLAT</button>
+
+    <div id="sonuc" style="display:none;">
+        <h3 id="baslik" style="text-align:center; color:#38bdf8; margin-top:20px;"></h3>
+        <div class="grid">
+            <div class="card"><div class="label">MS 1 Yüzde</div><div class="value" id="p1">%0</div></div>
+            <div class="card"><div class="label">MS 0 Yüzde</div><div class="value" id="p0">%0</div></div>
+            <div class="card"><div class="label">MS 2 Yüzde</div><div class="value" id="p2">%0</div></div>
+            <div class="card"><div class="label">İY Tahmini</div><div class="value" id="iyTahmin">-</div></div>
+            <div class="card"><div class="label">2.5 Gol Durumu</div><div class="value" id="golDurum">-</div></div>
+            <div class="card"><div class="label">KG VAR Oranı</div><div class="value" id="kgVar">%0</div></div>
+        </div>
+        <div class="card" style="margin-top:10px; border-left-color:#fb7185;">
+            <div class="label">Tahmini Skor Skalası</div>
+            <div class="value" id="skorlar">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function analizEt() {
+        let m1 = parseFloat(document.getElementById('ms1').value);
+        let m0 = parseFloat(document.getElementById('ms0').value);
+        let m2 = parseFloat(document.getElementById('ms2').value);
+        if(!m1 || !m0 || !m2) return alert("Lütfen oranları girin!");
+
+        let i1 = 1/m1, i0 = 1/m0, i2 = 1/m2;
+        let sum = i1 + i0 + i2;
+        let p1 = (i1/sum)*100, p0 = (i0/sum)*100, p2 = (i2/sum)*100;
+
+        document.getElementById('baslik').innerText = document.getElementById('ev').value + " - " + document.getElementById('dep').value;
+        document.getElementById('p1').innerText = "%" + p1.toFixed(1);
+        document.getElementById('p0').innerText = "%" + p0.toFixed(1);
+        document.getElementById('p2').innerText = "%" + p2.toFixed(1);
+        
+        document.getElementById('iyTahmin').innerText = p1 > p2 ? "İY 1" : "İY 2";
+        document.getElementById('golDurum').innerText = (m1+m2)/2 < 2.0 ? "2.5 ÜST" : "2.5 ALT";
+        document.getElementById('kgVar').innerText = (m1+m2) < 4.0 ? "%65" : "%40";
+        document.getElementById('skorlar').innerText = p1 > p2 ? "2-1 veya 1-0" : "1-2 veya 0-1";
+        
+        document.getElementById('sonuc').style.display = 'block';
+    }
+</script>
+</body>
+</html>
