@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oran Merkezi - Profesyonel Futbol Analizi</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 15px; min-height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; background: rgba(30, 41, 59, 0.95); padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        h1 { text-align: center; color: #38bdf8; margin-top: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 5px; color: #cbd5e1; font-size: 13px; font-weight: 600; }
+        input { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; font-size: 14px; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 15px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        
+        .result-box { margin-top: 25px; display: none; }
+        .match-header { font-size: 18px; font-weight: bold; color: #38bdf8; text-align: center; margin-bottom: 20px; }
+        .section-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
+        
+        .stat-card { background: #1e293b; padding: 14px; border-radius: 10px; text-align: center; margin-bottom: 10px; }
+        .stat-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 18px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Oran Merkezi</h1>
+    
+    <div class="row">
+        <div class="col form-group"><label>Ev Sahibi</label><input type="text" id="homeTeam" placeholder="Ev Sahibi"></div>
+        <div class="col form-group"><label>Deplasman</label><input type="text" id="awayTeam" placeholder="Deplasman"></div>
+    </div>
+    
+    <div class="form-group">
+        <label>Maç Sonu Oranları (MS 1 - 0 - 2)</label>
+        <div class="row">
+            <input type="number" step="0.01" id="ms1" placeholder="MS 1">
+            <input type="number" step="0.01" id="ms0" placeholder="MS 0">
+            <input type="number" step="0.01" id="ms2" placeholder="MS 2">
+        </div>
+    </div>
+    
+    <button onclick="calculateAnalysis()">Otomatik Analiz Yap</button>
+
+    <div class="result-box" id="resultArea">
+        <div class="match-header" id="headerText"></div>
+        
+        <div class="section-title">Maç Sonu Olasılıkları</div>
+        <div class="row">
+            <div class="col stat-card" style="border-top: 3px solid #38bdf8;"><div class="stat-label">MS 1</div><div class="stat-value" id="valMS1" style="color:#38bdf8;">-%</div></div>
+            <div class="col stat-card" style="border-top: 3px solid #f59e0b;"><div class="stat-label">MS 0</div><div class="stat-value" id="valMS0" style="color:#f59e0b;">-%</div></div>
+            <div class="col stat-card" style="border-top: 3px solid #ec4899;"><div class="stat-label">MS 2</div><div class="stat-value" id="valMS2" style="color:#ec4899;">-%</div></div>
+        </div>
+
+        <div class="section-title">Gol & Alt/Üst Analizleri</div>
+        <div class="stat-card" style="border-left: 5px solid #10b981;">
+            <div class="stat-label">2.5 Gol Durumu</div>
+            <div class="stat-value" id="valOverUnder" style="color:#10b981;">-%</div>
+        </div>
+        <div class="stat-card" style="border-left: 5px solid #8b5cf6;">
+            <div class="stat-label">Karşılıklı Gol (KG Var / Yok)</div>
+            <div class="stat-value" id="valKG" style="color:#8b5cf6;">-%</div>
+        </div>
+        <div class="stat-card" style="border-left: 5px solid #06b6d4;">
+            <div class="stat-label">Toplam Gol Sayısı Tahmini</div>
+            <div class="stat-value" id="valTotalGoals" style="color:#06b6d4;">-</div>
+        </div>
+
+        <div class="section-title">Skor & İY/MS Tahminleri</div>
+        <div class="stat-card" style="border-left: 5px solid #f43f5e;">
+            <div class="stat-label">İlk Yarı / Maç Sonu (İY / MS)</div>
+            <div class="stat-value" id="valIYMS" style="color:#f43f5e;">-</div>
+        </div>
+        <div class="stat-card" style="border-left: 5px solid #eab308;">
+            <div class="stat-label">İlk Yarı & Maç Sonu Skor Tahmini</div>
+            <div class="stat-value" id="valScores" style="color:#eab308;">-</div>
+        </div>
+
+        <div class="section-title">Korner Analizleri</div>
+        <div class="stat-card" style="border-left: 5px solid #14b8a6;">
+            <div class="stat-label">Ev Sahibi Korner Payı</div>
+            <div class="stat-value" id="valHomeCorner" style="color:#14b8a6;">-%</div>
+        </div>
+        <div class="stat-card" style="border-left: 5px solid #a855f7;">
+            <div class="stat-label">Deplasman Korner Payı</div>
+            <div class="stat-value" id="valAwayCorner" style="color:#a855f7;">-%</div>
+        </div>
+        <div class="stat-card" style="border-left: 5px solid #ec4899;">
+            <div class="stat-label">Toplam Korner (9.5 Üst/Alt)</div>
+            <div class="stat-value" id="valTotalCorner" style="color:#ec4899;">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateAnalysis() {
+        const home = document.getElementById('homeTeam').value || 'Ev Sahibi';
+        const away = document.getElementById('awayTeam').value || 'Deplasman';
+        
+        const m1 = parseFloat(document.getElementById('ms1').value) || 0;
+        const m0 = parseFloat(document.getElementById('ms0').value) || 0;
+        const m2 = parseFloat(document.getElementById('ms2').value) || 0;
+
+        if (m1 === 0 || m2 === 0) {
+            alert("Lütfen geçerli MS oranları girin!");
+            return;
+        }
+
+        // Olasılık Hesaplamaları
+        let imp1 = 1 / m1;
+        let imp0 = m0 > 0 ? (1 / m0) : 0.28;
+        let imp2 = 1 / m2;
+        let total = imp1 + imp0 + imp2;
+
+        let p1 = (imp1 / total) * 100;
+        let p0 = (imp0 / total) * 100;
+        let p2 = (imp2 / total) * 100;
+
+        // Gol ve KG Hesaplamaları
+        let avgOdd = (m1 + m2) / 2;
+        let over25Prob = avgOdd < 2.1 ? (72 + (2.1 - avgOdd)*15) : (45 - (avgOdd - 2.1)*10);
+        over25Prob = Math.min(Math.max(over25Prob, 30), 88);
+        
+        let kgVarProb = avgOdd < 2.3 ? (68 + (2.3 - avgOdd)*10) : (42 - (avgOdd - 2.3)*8);
+        kgVarProb = Math.min(Math.max(kgVarProb, 25), 85);
+
+        let totalGoalsVal = avgOdd < 1.8 ? "3 veya 4 Gol (2.5 Üst)" : (avgOdd < 2.5 ? "2 veya 3 Gol" : "1 veya 2 Gol (2.5 Alt)");
+
+        // Skor ve İY/MS Tahminleri
+        let iyMs = p1 > p2 ? "1 / 1 (Favori Kazanır)" : (p2 > p1 ? "2 / 2 (Dep. Kazanır)" : "0 / 0 veya 1 / 0");
+        let iyScore = p1 > p2 ? "İY: 1-0 | MS: 2-1" : (p2 > p1 ? "İY: 0-1 | MS: 1-2" : "İY: 0-0 | MS: 1-1");
+
+        // Korner Hesaplamaları
+        let homeCornerShare = (p1 / (p1 + p2)) * 100;
+        let awayCornerShare = 100 - homeCornerShare;
+        let totalCornerText = avgOdd < 2.0 ? "9.5 ÜST (%70)" : "9.5 ALT / 8.5 ÜST (%55)";
+
+        // Arayüze Yazdırma
+        document.getElementById('headerText').innerText = `${home} vs ${away}`;
+        document.getElementById('valMS1').innerText = `%${p1.toFixed(1)}`;
+        document.getElementById('valMS0').innerText = `%${p0.toFixed(1)}`;
+        document.getElementById('valMS2').innerText = `%${p2.toFixed(1)}`;
+
+        document.getElementById('valOverUnder').innerText = `%${over25Prob.toFixed(1)} (2.5 Üst)`;
+        document.getElementById('valKG').innerText = `%${kgVarProb.toFixed(1)} (KG Var)`;
+        document.getElementById('valTotalGoals').innerText = totalGoalsVal;
+
+        document.getElementById('valIYMS').innerText = iyMs;
+        document.getElementById('valScores').innerText = iyScore;
+
+        document.getElementById('valHomeCorner').innerText = `%${homeCornerShare.toFixed(1)}`;
+        document.getElementById('valAwayCorner').innerText = `%${awayCornerShare.toFixed(1)}`;
+        document.getElementById('valTotalCorner').innerText = totalCornerText;
+
+        document.getElementById('resultArea').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
